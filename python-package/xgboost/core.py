@@ -30,9 +30,11 @@ from ._typing import (
     ArrayLike,
     CFloatPtr,
     NumpyOrCupy,
+    FeatureInfo,
+    FeatureTypes,
     FeatureNames,
     _T,
-    CupyT,
+    CupyT
 )
 
 
@@ -432,7 +434,7 @@ class DataIter(ABC):  # pylint: disable=too-many-instance-attributes
             data: Any,
             *,
             feature_names: FeatureNames = None,
-            feature_types: Optional[List[str]] = None,
+            feature_types: FeatureTypes = None,
             **kwargs: Any,
         ) -> None:
             from .data import dispatch_proxy_set_data
@@ -553,7 +555,7 @@ class DMatrix:  # pylint: disable=too-many-instance-attributes
         missing: Optional[float] = None,
         silent: bool = False,
         feature_names: FeatureNames = None,
-        feature_types: Optional[List[str]] = None,
+        feature_types: FeatureTypes = None,
         nthread: Optional[int] = None,
         group: Optional[ArrayLike] = None,
         qid: Optional[ArrayLike] = None,
@@ -711,7 +713,7 @@ class DMatrix:  # pylint: disable=too-many-instance-attributes
         label_lower_bound: Optional[ArrayLike] = None,
         label_upper_bound: Optional[ArrayLike] = None,
         feature_names: FeatureNames = None,
-        feature_types: Optional[List[str]] = None,
+        feature_types: FeatureTypes = None,
         feature_weights: Optional[ArrayLike] = None
     ) -> None:
         """Set meta info for DMatrix.  See doc string for :py:obj:`xgboost.DMatrix`."""
@@ -992,7 +994,7 @@ class DMatrix:  # pylint: disable=too-many-instance-attributes
         return res
 
     @property
-    def feature_names(self) -> Optional[List[str]]:
+    def feature_names(self) -> FeatureNames:
         """Get feature names (column labels).
 
         Returns
@@ -1061,7 +1063,7 @@ class DMatrix:  # pylint: disable=too-many-instance-attributes
             self.feature_types = None
 
     @property
-    def feature_types(self) -> Optional[List[str]]:
+    def feature_types(self) -> FeatureTypes:
         """Get feature types (column types).
 
         Returns
@@ -1201,7 +1203,7 @@ class DeviceQuantileDMatrix(DMatrix):
         missing: Optional[float] = None,
         silent: bool = False,
         feature_names: FeatureNames = None,
-        feature_types: Optional[List[str]] = None,
+        feature_types: FeatureTypes = None,
         nthread: Optional[int] = None,
         max_bin: int = 256,
         group: Optional[ArrayLike] = None,
@@ -1634,7 +1636,7 @@ class Booster:
             _check_call(_LIB.XGBoosterSetAttr(
                 self.handle, c_str(key), value))
 
-    def _get_feature_info(self, field: str) -> Optional[List[str]]:
+    def _get_feature_info(self, field: str) -> FeatureInfo:
         length = c_bst_ulong()
         sarr = ctypes.POINTER(ctypes.c_char_p)()
         if not hasattr(self, "handle") or self.handle is None:
@@ -1647,7 +1649,7 @@ class Booster:
         feature_info = from_cstr_to_pystr(sarr, length)
         return feature_info if feature_info else None
 
-    def _set_feature_info(self, features: Optional[List[str]], field: str) -> None:
+    def _set_feature_info(self, features: FeatureInfo, field: str) -> None:
         if features is not None:
             assert isinstance(features, list)
             feature_info_bytes = [bytes(f, encoding="utf-8") for f in features]
@@ -1665,7 +1667,7 @@ class Booster:
             )
 
     @property
-    def feature_types(self) -> Optional[List[str]]:
+    def feature_types(self) -> FeatureTypes:
         """Feature types for this booster.  Can be directly set by input data or by
         assignment.
 
@@ -1673,11 +1675,11 @@ class Booster:
         return self._get_feature_info("feature_type")
 
     @feature_types.setter
-    def feature_types(self, features: Optional[List[str]]) -> None:
+    def feature_types(self, features: FeatureTypes) -> None:
         self._set_feature_info(features, "feature_type")
 
     @property
-    def feature_names(self) -> Optional[List[str]]:
+    def feature_names(self) -> FeatureNames:
         """Feature names for this booster.  Can be directly set by input data or by
         assignment.
 
