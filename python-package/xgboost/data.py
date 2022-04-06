@@ -14,7 +14,7 @@ from .core import c_array, _LIB, _check_call, c_str
 from .core import _cuda_array_interface
 from .core import DataIter, _ProxyDMatrix, DMatrix
 from .compat import lazy_isinstance, DataFrame
-from ._typing import c_bst_ulong, DataType, FeatureTypes, FeatureNames, NumpyDType, CupyT
+from ._typing import c_bst_ulong, DataType, FeatureTypes, FeatureNames, NumpyDType, CupyT, FloatCompatible
 
 DispatchedDataBackendReturnType = Tuple[ctypes.c_void_p, FeatureNames, FeatureTypes]
 
@@ -26,7 +26,7 @@ CAT_T = "c"
 _matrix_meta = {"base_margin", "label"}
 
 
-def _warn_unused_missing(data: DataType, missing: Optional[float]) -> None:
+def _warn_unused_missing(data: DataType, missing: Optional[FloatCompatible]) -> None:
     if (missing is not None) and (not np.isnan(missing)):
         warnings.warn(
             '`missing` is not used for current input data type:' +
@@ -67,7 +67,7 @@ def _array_interface(data: np.ndarray) -> bytes:
 
 def _from_scipy_csr(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -106,7 +106,7 @@ def _is_scipy_csc(data: DataType) -> bool:
 
 def _from_scipy_csc(
     data: DataType,
-    missing: Optional[float],
+    missing: Optional[FloatCompatible],
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
 ) -> DispatchedDataBackendReturnType:
@@ -163,7 +163,7 @@ def _maybe_np_slice(data: np.ndarray, dtype: Optional[NumpyDType]) -> np.ndarray
 
 def _from_numpy_array(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -338,7 +338,7 @@ def _transform_pandas_df(
 def _from_pandas_df(
     data: DataFrame,
     enable_categorical: bool,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -382,7 +382,7 @@ def _is_modin_series(data: DataType) -> bool:
 
 def _from_pandas_series(
     data:DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     enable_categorical: bool,
     feature_names: FeatureNames,
@@ -455,7 +455,7 @@ def _transform_dt_df(
 
 def _from_dt_df(
     data: DataType,
-    missing: Optional[float],
+    missing: Optional[FloatCompatible],
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -544,7 +544,7 @@ def record_batch_data_iter(data_iter: Iterator) -> Callable:
 
 def _from_arrow(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -688,7 +688,7 @@ def _transform_cudf_df(
 
 def _from_cudf_df(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -736,7 +736,7 @@ def _transform_cupy_array(data: DataType) -> CupyT:
 
 def _from_cupy_array(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -783,7 +783,7 @@ def _transform_dlpack(data: DataType) -> bool:
 
 def _from_dlpack(
     data: DataType,
-    missing: float,
+    missing: FloatCompatible,
     nthread: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -799,7 +799,7 @@ def _is_uri(data: DataType) -> bool:
 
 def _from_uri(
     data: DataType,
-    missing: Optional[float],
+    missing: Optional[FloatCompatible],
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
 ) -> DispatchedDataBackendReturnType:
@@ -818,7 +818,7 @@ def _is_list(data: DataType) -> bool:
 
 def _from_list(
     data: Sequence,
-    missing: float,
+    missing: FloatCompatible,
     n_threads: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -834,7 +834,7 @@ def _is_tuple(data: DataType) -> bool:
 
 def _from_tuple(
     data: Sequence,
-    missing: float,
+    missing: FloatCompatible,
     n_threads: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
@@ -870,7 +870,7 @@ def _convert_unknown_data(data: DataType) -> DataType:
 
 def dispatch_data_backend(
     data: DataType,
-    missing: float,  # Or Optional[float]
+    missing: FloatCompatible,  # Or Optional[Float]
     threads: int,
     feature_names: FeatureNames,
     feature_types: FeatureTypes,
