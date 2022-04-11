@@ -24,7 +24,7 @@ from ._typing import (
     FloatCompatible
 )
 
-DispatchedDataBackendReturnType = Tuple[ctypes.c_void_p, FeatureNames, FeatureTypes]
+DispatchedDataBackendReturnType = Tuple[ctypes.c_void_p, Optional[FeatureNames], Optional[FeatureTypes]]
 
 CAT_T = "c"
 
@@ -77,8 +77,8 @@ def _from_scipy_csr(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     """Initialize data from a CSR matrix."""
     if len(data.indices) != len(data.data):
@@ -115,8 +115,8 @@ def _is_scipy_csc(data: DataType) -> bool:
 def _from_scipy_csc(
     data: DataType,
     missing: Optional[FloatCompatible],
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     if len(data.indices) != len(data.data):
         raise ValueError(f"length mismatch: {len(data.indices)} vs {len(data.data)}")
@@ -173,8 +173,8 @@ def _from_numpy_array(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     """Initialize data from a 2-D numpy matrix.
 
@@ -260,11 +260,11 @@ be set to `True`.""" + err
 def _transform_pandas_df(
     data: DataFrame,
     enable_categorical: bool,
-    feature_names: FeatureNames = None,
-    feature_types: FeatureTypes = None,
+    feature_names: Optional[FeatureNames] = None,
+    feature_types: Optional[FeatureTypes] = None,
     meta: Optional[str] = None,
     meta_type: Optional[NumpyDType] = None,
-) -> Tuple[np.ndarray, FeatureNames, FeatureTypes]:
+) -> Tuple[np.ndarray, Optional[FeatureNames], Optional[FeatureTypes]]:
     import pandas as pd
     from pandas.api.types import (
         is_sparse,
@@ -348,8 +348,8 @@ def _from_pandas_df(
     enable_categorical: bool,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     data, feature_names, feature_types = _transform_pandas_df(
         data, enable_categorical, feature_names, feature_types
@@ -393,8 +393,8 @@ def _from_pandas_series(
     missing: FloatCompatible,
     nthread: int,
     enable_categorical: bool,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     from pandas.api.types import is_categorical_dtype
 
@@ -424,11 +424,11 @@ _dt_type_mapper2 = {'bool': 'i', 'int': 'int', 'real': 'float'}
 
 def _transform_dt_df(
     data: DataType,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     meta: Optional[str] = None,
     meta_type: Optional[NumpyDType] = None,
-) -> Tuple[np.ndarray, FeatureNames, FeatureTypes]:
+) -> Tuple[np.ndarray, Optional[FeatureNames], Optional[FeatureTypes]]:
     """Validate feature names and types if data table"""
     if meta and data.shape[1] > 1:
         raise ValueError('DataTable for meta info cannot have multiple columns')
@@ -465,8 +465,8 @@ def _from_dt_df(
     data: DataType,
     missing: Optional[FloatCompatible],
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool,
 ) -> DispatchedDataBackendReturnType:
     if enable_categorical:
@@ -554,8 +554,8 @@ def _from_arrow(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool,
 ) -> DispatchedDataBackendReturnType:
     import pyarrow as pa
@@ -632,10 +632,10 @@ def _cudf_array_interfaces(data: DataType, cat_codes: list) -> bytes:
 
 def _transform_cudf_df(
     data: DataType,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool,
-) -> Tuple[ctypes.c_void_p, list, FeatureNames, FeatureTypes]:
+) -> Tuple[ctypes.c_void_p, list, Optional[FeatureNames], Optional[FeatureTypes]]:
     try:
         from cudf.api.types import is_categorical_dtype
     except ImportError:
@@ -698,8 +698,8 @@ def _from_cudf_df(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool,
 ) -> DispatchedDataBackendReturnType:
     data, cat_codes, feature_names, feature_types = _transform_cudf_df(
@@ -746,8 +746,8 @@ def _from_cupy_array(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     """Initialize DMatrix from cupy ndarray."""
     data = _transform_cupy_array(data)
@@ -793,8 +793,8 @@ def _from_dlpack(
     data: DataType,
     missing: FloatCompatible,
     nthread: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     data = _transform_dlpack(data)
     return _from_cupy_array(data, missing, nthread, feature_names,
@@ -808,8 +808,8 @@ def _is_uri(data: DataType) -> bool:
 def _from_uri(
     data: DataType,
     missing: Optional[FloatCompatible],
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     _warn_unused_missing(data, missing)
     handle = ctypes.c_void_p()
@@ -828,8 +828,8 @@ def _from_list(
     data: Sequence,
     missing: FloatCompatible,
     n_threads: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     array = np.array(data)
     _check_data_shape(data)
@@ -844,8 +844,8 @@ def _from_tuple(
     data: Sequence,
     missing: FloatCompatible,
     n_threads: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
 ) -> DispatchedDataBackendReturnType:
     return _from_list(data, missing, n_threads, feature_names, feature_types)
 
@@ -880,8 +880,8 @@ def dispatch_data_backend(
     data: DataType,
     missing: FloatCompatible,  # Or Optional[Float]
     threads: int,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool = False,
 ) -> DispatchedDataBackendReturnType:
     '''Dispatch data for DMatrix.'''
@@ -1130,10 +1130,10 @@ class SingleBatchInternalIter(DataIter):  # pylint: disable=R0902
 
 def _proxy_transform(
     data: DataType,
-    feature_names: FeatureNames,
-    feature_types: FeatureTypes,
+    feature_names: Optional[FeatureNames],
+    feature_types: Optional[FeatureTypes],
     enable_categorical: bool,
-) -> Tuple[Union[bool, ctypes.c_void_p, np.ndarray], Optional[list], FeatureNames, FeatureTypes]:
+) -> Tuple[Union[bool, ctypes.c_void_p, np.ndarray], Optional[list], Optional[FeatureNames], Optional[FeatureTypes]]:
     if _is_cudf_df(data) or _is_cudf_ser(data):
         return _transform_cudf_df(
             data, feature_names, feature_types, enable_categorical
