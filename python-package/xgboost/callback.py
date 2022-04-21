@@ -24,6 +24,7 @@ __all__ = [
     "EarlyStopping",
     "EvaluationMonitor",
     "TrainingCheckPoint",
+    "CallbackContainer"
 ]
 
 _Score = Union[float, Tuple[float, float]]
@@ -184,7 +185,7 @@ class CallbackContainer:
         return model
 
     def before_iteration(
-        self, model: _Model, epoch: int, dtrain: DMatrix, evals: List[Tuple[DMatrix, str]]
+        self, model: _Model, epoch: int, dtrain: DMatrix, evals: Optional[List[Tuple[DMatrix, str]]]
     ) -> bool:
         '''Function called before training iteration.'''
         return any(c.before_iteration(model, epoch, self.history)
