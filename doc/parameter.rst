@@ -235,7 +235,7 @@ These parameters are only used for training with categorical data. See
 .. note:: These parameters are experimental. ``exact`` tree method is not yet supported.
 
 
-* ``max_cat_to_onehot``
+* ``max_cat_to_onehot``, [default=4]
 
   .. versionadded:: 1.6.0
 
@@ -243,7 +243,7 @@ These parameters are only used for training with categorical data. See
     categorical data.  When number of categories is lesser than the threshold then one-hot
     encoding is chosen, otherwise the categories will be partitioned into children nodes.
 
-* ``max_cat_threshold``
+* ``max_cat_threshold``, [default=64]
 
   .. versionadded:: 1.7.0
 
